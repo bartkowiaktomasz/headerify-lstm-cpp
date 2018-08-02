@@ -4,7 +4,7 @@
 int main() {
     // Initialize model.
     KerasModel model;
-    model.LoadModel("lstm.model");
+    model.LoadModel();
 
     // Create a 1D Tensor on length 10 for input data.
     Tensor in(40,3);
