@@ -1,6 +1,6 @@
 /*
 Compile with:
-g++ --std=c++11 -Wall -O3 test_cpp_model.cpp keras_model.cpp utils.cpp -o output
+g++ --std=c++11 -Wall -O3 test_cpp_model.cpp keras_model.cpp utils.cpp config.cpp -o output
 */
 
 #include <iostream>
