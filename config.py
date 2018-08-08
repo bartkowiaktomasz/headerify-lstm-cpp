@@ -35,6 +35,7 @@ DATA_PATH = 'data/data.pckl'
 # Model directories
 MODEL_PATH = 'models/model.h5'
 MODEL_PATH_DIR = 'models/'
+HEADERFILE_NAME = 'LSTM_model.h'
 
 ##################################################
 ### MODEL

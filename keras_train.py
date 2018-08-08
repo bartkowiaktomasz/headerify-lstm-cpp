@@ -7,7 +7,6 @@ Paths can be edited in config file.
 """
 
 from __future__ import print_function
-import numpy as np
 import pandas as pd
 
 from keras.models import Sequential

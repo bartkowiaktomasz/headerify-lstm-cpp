@@ -14,7 +14,5 @@ namespace config{
      "Lunge"
    };
 
-   int SEGMENT_TIME_SIZE = 40;
-   int TIME_STEP = 20;
    int N_FEATURES = 3;
 }

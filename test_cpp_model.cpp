@@ -13,8 +13,9 @@ int main() {
     KerasModel model;
     model.LoadModel();
 
-    // Create a 1D Tensor of shape (SEGMENT_TIME_SIZE, N_FEATURES) for input data.
-    Tensor in(config::SEGMENT_TIME_SIZE, config::N_FEATURES);
+    // Create a 1D Tensor of shape (segment_time_size, N_FEATURES) for input data.
+    segment_time_size = 40
+    Tensor in(segment_time_size, config::N_FEATURES);
     in.data_ = {-14.44,  -1.68,  -2.40,
                 -14.44,  -1.68,  -2.40,
                 -14.63,   3.36,  -2.35,

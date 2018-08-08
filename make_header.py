@@ -140,6 +140,7 @@ def make_header(model):
                 append_number_vector(file, "b_f", b_f)
                 append_number_vector(file, "b_c", b_c)
                 append_number_vector(file, "b_o", b_o)
+    file.close()
 
 if __name__ == '__main__':
     model = load_model(MODEL_PATH)
