@@ -1,13 +1,20 @@
+/*
+Compile with:
+g++ --std=c++11 -Wall -O3 test_cpp_model.cpp keras_model.cpp utils.cpp -o output
+*/
+
+#include <iostream>
 #include "keras_model.h"
 #include "utils.h"
+#include "config.h"
 
 int main() {
     // Initialize model.
     KerasModel model;
     model.LoadModel();
 
-    // Create a 1D Tensor on length 10 for input data.
-    Tensor in(40,3);
+    // Create a 1D Tensor of shape (SEGMENT_TIME_SIZE, N_FEATURES) for input data.
+    Tensor in(config::SEGMENT_TIME_SIZE, config::N_FEATURES);
     in.data_ = {-14.44,  -1.68,  -2.40,
                 -14.44,  -1.68,  -2.40,
                 -14.63,   3.36,  -2.35,
@@ -51,6 +58,7 @@ int main() {
 
     Tensor out;
     model.Apply(&in, &out);
+    // Should return "Jumping"
     std::cout << softmax_to_label(out.data_) << std::endl;
     return 0;
 }

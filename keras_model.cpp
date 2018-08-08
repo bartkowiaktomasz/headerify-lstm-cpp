@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2016 Robert W. Rose
  *
+ * Edited by Tomasz Bartkowiak (July 2018)
  * MIT License, see LICENSE file.
  */
 

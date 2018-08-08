@@ -67,7 +67,6 @@ std::vector<float> b_o = {
 unsigned int DENSE_WEIGHTS_ROWS = 30;
 unsigned int DENSE_WEIGHTS_COLS = 7;
 unsigned int DENSE_BIASES_SHAPE = 7;
-
 unsigned int DENSE_ACTIVATION = 4;
 
 std::vector<float> DENSE_WEIGHTS = {

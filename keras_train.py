@@ -1,23 +1,39 @@
+"""
+Script for training a LSTM network.
+Usage:
+Place your training data in DATA_PATH and run the script.
+The script will build a model and save it to MODEL_PATH.
+Paths can be edited in config file.
+"""
+
 from __future__ import print_function
 import numpy as np
 import pandas as pd
 
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, LSTM, Bidirectional
-from keras.datasets import imdb
+from keras.layers import Dense, Dropout, LSTM
 from sklearn.model_selection import train_test_split
 
 from preprocessing import get_convoluted_data
 from config import *
 
-def createLSTM():
+def createLSTM(X_train,
+               y_train,
+               X_test,
+               y_test):
+    """
+    Create a LSTM model.
+    Take as input training and testing data an labels.
+    Hyperparameters of the model are taken from the config file.
+    """
 
     # Build a model
     model = Sequential()
     model.add(LSTM(N_HIDDEN_NEURONS, input_shape=(SEGMENT_TIME_SIZE, N_FEATURES)))
     model.add(Dropout(DROPOUT_RATE))
     model.add(Dense(N_CLASSES, activation='sigmoid'))
-    model.compile('adam', 'binary_crossentropy', metrics=['accuracy'])
+    adam_optimizer = Adam(lr=LEARNING_RATE, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
+    model.compile(optimizer=adam_optimizer, loss='binary_crossentropy', metrics=['accuracy'])
     model.fit(X_train, y_train,
               batch_size=BATCH_SIZE,
               epochs=N_EPOCHS,
@@ -35,5 +51,5 @@ if __name__ == '__main__':
                                                         random_state=RANDOM_SEED,
                                                         shuffle=True)
     # Build a model
-    model = createLSTM()
+    model = createLSTM(X_train, y_train, X_test, y_test)
     model.save(MODEL_PATH)

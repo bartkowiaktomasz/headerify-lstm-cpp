@@ -8,7 +8,6 @@
 #define KERAS_MODEL_H_
 
 #include <algorithm>
-#include <math.h>
 #include <numeric>
 #include <string>
 #include <vector>
@@ -276,13 +275,13 @@ enum ActivationType {
 
 enum LayerType {
     kDense = 1,
-    kConvolution2d = 2,
-    kFlatten = 3,
-    kElu = 4,
-    kActivation = 5,
-    kMaxPooling2D = 6,
-    kLSTM = 7,
-    kEmbedding = 8
+    // kConvolution2d = 2,
+    // kFlatten = 3,
+    // kElu = 4,
+    kActivation = 2,
+    // kMaxPooling2D = 6,
+    kLSTM = 3,
+    // kEmbedding = 8
 };
 
 class KerasLayer {

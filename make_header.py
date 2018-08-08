@@ -1,21 +1,21 @@
+"""
+Script for making a C++ headerfile with LSTM network
+based on a keras ".h5" model placed in MODEL_PATH
+(see config file).
+"""
+
 import numpy as np
 import pandas as pd
 import keras
 
 from keras.models import load_model
-from kerasify import export_model
 
 from config import *
 from preprocessing import get_convoluted_data
 
 LAYER_DENSE = 1
-LAYER_CONVOLUTION2D = 2
-LAYER_FLATTEN = 3
-LAYER_ELU = 4
-LAYER_ACTIVATION = 5
-LAYER_MAXPOOLING2D = 6
-LAYER_LSTM = 7
-LAYER_EMBEDDING = 8
+LAYER_ACTIVATION = 2
+LAYER_LSTM = 3
 
 ACTIVATION_LINEAR = 1
 ACTIVATION_RELU = 2
@@ -23,19 +23,6 @@ ACTIVATION_SOFTPLUS = 3
 ACTIVATION_SIGMOID = 4
 ACTIVATION_TANH = 5
 ACTIVATION_HARD_SIGMOID = 6
-
-"""
-def append_number_matrix(file, name, matrix):
-    file.write("std::vector<std::vector<float>> " + name + " = {\n")
-    for arr in matrix:
-        file.write("{")
-        file.write(', '.join(map(str, arr.tolist())))
-        if not np.array_equal(arr, matrix[-1]):
-            file.write("},\n")
-        else:
-            file.write("}\n")
-    file.write("};\n\n")
-"""
 
 def activation_type(activation):
     if activation == 'linear':
@@ -56,25 +43,20 @@ def append_number_vector(file, name, vector):
     file.write(', '.join(map(str, vector.tolist())))
     file.write("};\n\n")
 
-
 def append_includes(file):
     file.write("#include <string>\n")
     file.write("#include <vector>\n")
     file.write("\n")
 
-
-if __name__ == '__main__':
-
-    # Load model
-    model = load_model(MODEL_PATH)
-    filename = "LSTM_model.h"
-
+def make_header(model):
     model_layers = [l for l in model.layers if type(l).__name__ not in ['Dropout']]
     num_layers = len(model_layers)
-
-    with open(filename, "a") as file:
+    with open(HEADERFILE_NAME, "a") as file:
         append_includes(file)
         file.write("unsigned int NUM_LAYERS = " + str(num_layers) + ";\n")
+        if(num_layers != 2):
+            print("Models with two layers are allowed only")
+            raise ValueError
 
         for layer in model_layers:
             layer_type = type(layer).__name__
@@ -159,9 +141,6 @@ if __name__ == '__main__':
                 append_number_vector(file, "b_c", b_c)
                 append_number_vector(file, "b_o", b_o)
 
-
-    # data = pd.read_pickle(DATA_PATH)
-    # X_test, _ = get_convoluted_data(data)
-    # print(model.predict(X_test[0].reshape(1,40,3)))
-
-    # export_model(model, 'lstm.model')
+if __name__ == '__main__':
+    model = load_model(MODEL_PATH)
+    make_header(model)
