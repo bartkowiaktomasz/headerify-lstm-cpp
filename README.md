@@ -1,5 +1,5 @@
-# Headerify-lstm-cpp
-Headerify-lstm-cpp is a small tool for coverting keras (1-layer LSTM + dense a.k.a fully connected layer) LSTM model to C++ headerfile that can be uploaded directly on the Arduino device allowing for on-board classification.
+# Headerify LSTM for C++
+**Headerify LSTM for C++** is a small tool for coverting keras (1-layer LSTM + dense a.k.a fully connected layer) LSTM model to C++ headerfile that can be uploaded directly on the Arduino device allowing for on-board classification.
 
 The tool is based on the amazing project by [Robert (moof2k) Wrose](https://github.com/moof2k) called [kerasify](https://github.com/moof2k/kerasify).
 
