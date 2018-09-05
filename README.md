@@ -57,7 +57,7 @@ int main() {
 	 by comma) inbetween the curly brackets "{}". You can
 	 "push_back" since in.data_ is a <float> vector.
 	*/
-    in.data_ = { }
+    in.data_ = { };
 
     Tensor out;		// This tensor will store the output
     model.Apply(&in, &out);		// Perform the calculations
@@ -75,4 +75,4 @@ The output of the classification is a vector of numbers (after softmax). The fun
 
 `keras_train.py` allows for building a keras LSTM model (the script saves the model in `models/` directory) based on the `data.pckl` file found in `data/` directory. Here `data.pckl` contains readings from the accelerometer `x-acceleration, y-acceleration, z-acceleration`. `keras_train.py` uses `config.py` with global variables that define how data is preprocessed in `preprocessing.py` and with all hyperparameters of the LSTM network (i.e. learning rate, number of neurons). In short, the data is preprocessed using *sliding window approach* and the network is then trained on those *windows* of data (each window consists of a series of samples and one label associated with it).
 
-More information on how data gets preprocessed can be found in my project on [Fitness activity classification using Bidirectional LSTMs](https://github.com/bartkowiaktomasz/Fitness-Activity-Classification-with-LSTMs).
+More information on how data gets preprocessed can be found in my project on [Fitness Activity Recognition with LSTMs](https://github.com/bartkowiaktomasz/Fitness-Activity-Classification-with-LSTMs).

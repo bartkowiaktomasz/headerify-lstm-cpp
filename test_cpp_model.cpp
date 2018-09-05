@@ -59,7 +59,7 @@ int main() {
 
     Tensor out;
     model.Apply(&in, &out);
-    // Should return "Jumping"
+    // Returns "Jumping"
     std::cout << softmax_to_label(out.data_) << std::endl;
     return 0;
 }
