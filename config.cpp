@@ -15,4 +15,5 @@ namespace config{
    };
 
    int N_FEATURES = 3;
+   int SEGMENT_TIME_SIZE = 40;
 }

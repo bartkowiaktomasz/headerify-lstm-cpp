@@ -97,7 +97,7 @@ bool KerasLayerActivation::Apply(Tensor* in, Tensor* out) {
     return true;
 }
 
-bool KerasLayerDense::LoadLayer() {
+bool KerasLayerDense::LoadLayer(unsigned int dummy_int) {
     unsigned int weights_rows = DENSE_WEIGHTS_ROWS;
     unsigned int weights_cols = DENSE_WEIGHTS_COLS;
     unsigned int biases_shape = DENSE_BIASES_SHAPE;
@@ -137,63 +137,63 @@ bool KerasLayerDense::Apply(Tensor* in, Tensor* out) {
     return true;
 }
 
-bool KerasLayerLSTM::LoadLayer() {
-    unsigned int wi_rows = W_i_ROWS;
-    unsigned int wi_cols = W_i_COLS;
-    unsigned int ui_rows = U_i_ROWS;
-    unsigned int ui_cols = U_i_COLS;
-    unsigned int bi_shape = b_i_SHAPE;
-    unsigned int wf_rows = W_f_ROWS;
-    unsigned int wf_cols = W_f_COLS;
-    unsigned int uf_rows = U_f_ROWS;
-    unsigned int uf_cols = U_f_COLS;
-    unsigned int bf_shape = b_f_SHAPE;
-    unsigned int wc_rows = W_c_ROWS;
-    unsigned int wc_cols = W_c_COLS;
-    unsigned int uc_rows = U_c_ROWS;
-    unsigned int uc_cols = U_c_COLS;
-    unsigned int bc_shape = b_c_SHAPE;
-    unsigned int wo_rows = W_o_ROWS;
-    unsigned int wo_cols = W_o_COLS;
-    unsigned int uo_rows = U_o_ROWS;
-    unsigned int uo_cols = U_o_COLS;
-    unsigned int bo_shape = b_o_SHAPE;
+bool KerasLayerLSTM::LoadLayer(unsigned int i) {
+    unsigned int wi_rows = W_i_ROWS[i];
+    unsigned int wi_cols = W_i_COLS[i];
+    unsigned int ui_rows = U_i_ROWS[i];
+    unsigned int ui_cols = U_i_COLS[i];
+    unsigned int bi_shape = b_i_SHAPE[i];
+    unsigned int wf_rows = W_f_ROWS[i];
+    unsigned int wf_cols = W_f_COLS[i];
+    unsigned int uf_rows = U_f_ROWS[i];
+    unsigned int uf_cols = U_f_COLS[i];
+    unsigned int bf_shape = b_f_SHAPE[i];
+    unsigned int wc_rows = W_c_ROWS[i];
+    unsigned int wc_cols = W_c_COLS[i];
+    unsigned int uc_rows = U_c_ROWS[i];
+    unsigned int uc_cols = U_c_COLS[i];
+    unsigned int bc_shape = b_c_SHAPE[i];
+    unsigned int wo_rows = W_o_ROWS[i];
+    unsigned int wo_cols = W_o_COLS[i];
+    unsigned int uo_rows = U_o_ROWS[i];
+    unsigned int uo_cols = U_o_COLS[i];
+    unsigned int bo_shape = b_o_SHAPE[i];
 
     // Load Input Weights and Biases
     Wi_.Resize(wi_rows, wi_cols);
     Ui_.Resize(ui_rows, ui_cols);
     bi_.Resize(1, bi_shape);
-    Wi_.data_ = W_i;
-    Ui_.data_ = U_i;
-    bi_.data_ = b_i;
+    Wi_.data_ = W_i[i];
+    Ui_.data_ = U_i[i];
+    bi_.data_ = b_i[i];
 
     // Load Forget Weights and Biases
     Wf_.Resize(wf_rows, wf_cols);
     Uf_.Resize(uf_rows, uf_cols);
     bf_.Resize(1, bf_shape);
-    Wf_.data_ = W_f;
-    Uf_.data_ = U_f;
-    bf_.data_ = b_f;
+    Wf_.data_ = W_f[i];
+    Uf_.data_ = U_f[i];
+    bf_.data_ = b_f[i];
 
     // Load State Weights and Biases
     Wc_.Resize(wc_rows, wc_cols);
     Uc_.Resize(uc_rows, uc_cols);
     bc_.Resize(1, bc_shape);
-    Wc_.data_ = W_c;
-    Uc_.data_ = U_c;
-    bc_.data_ = b_c;
+    Wc_.data_ = W_c[i];
+    Uc_.data_ = U_c[i];
+    bc_.data_ = b_c[i];
 
     // Load Output Weights and Biases
     Wo_.Resize(wo_rows, wo_cols);
     Uo_.Resize(uo_rows, uo_cols);
     bo_.Resize(1, bo_shape);
-    Wo_.data_ = W_o;
-    Uo_.data_ = U_o;
-    bo_.data_ = b_o;
+    Wo_.data_ = W_o[i];
+    Uo_.data_ = U_o[i];
+    bo_.data_ = b_o[i];
 
     innerActivation_.LoadActivation(ActivationType::kHardSigmoid);
     activation_.LoadActivation(ActivationType::kTanh);
-    return_sequences_ = (bool)RETURN_SEQUENCES;
+    return_sequences_ = (bool)RETURN_SEQUENCES[i];
 
     return true;
 }
@@ -288,7 +288,7 @@ bool KerasModel::LoadModel() {
             break;
         }
 
-        bool result = layer->LoadLayer();
+        bool result = layer->LoadLayer(i);
         if (!result) {
             printf("Failed to load layer %d", i);
             delete layer;

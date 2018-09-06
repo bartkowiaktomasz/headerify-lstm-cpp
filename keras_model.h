@@ -290,7 +290,7 @@ class KerasLayer {
 
     virtual ~KerasLayer() {}
 
-    virtual bool LoadLayer() = 0;
+    virtual bool LoadLayer(unsigned int i) = 0;
 
     virtual bool Apply(Tensor* in, Tensor* out) = 0;
 };
@@ -301,7 +301,7 @@ class KerasLayerActivation : public KerasLayer {
 
     virtual ~KerasLayerActivation() {}
 
-    virtual bool LoadLayer() { return true; }
+    virtual bool LoadLayer(unsigned int i) { return true; }
 
     bool LoadActivation(ActivationType activation_);
 
@@ -317,7 +317,7 @@ class KerasLayerDense : public KerasLayer {
 
     virtual ~KerasLayerDense() {}
 
-    virtual bool LoadLayer();
+    virtual bool LoadLayer(unsigned int dummy_int);
 
     virtual bool Apply(Tensor* in, Tensor* out);
 
@@ -334,7 +334,7 @@ class KerasLayerLSTM : public KerasLayer {
 
     virtual ~KerasLayerLSTM() {}
 
-    virtual bool LoadLayer();
+    virtual bool LoadLayer(unsigned int i);
 
     virtual bool Apply(Tensor* in, Tensor* out);
 

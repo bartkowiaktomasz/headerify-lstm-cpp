@@ -8,7 +8,8 @@ The tool is based on the amazing project by [Robert (moof2k) Wrose](https://gith
 **Headerify LSTM for C++** is a modification of [kerasify](https://github.com/moof2k/kerasify) focusing solely on LSTM networks, allowing, i.e. for on-board [Activity recognition](https://github.com/bartkowiaktomasz/Fitness-Activity-Classification-with-LSTMs) based on IMU readings (data from the accelerometer/gyroscope/magnetometer). Unlike [kerasify](https://github.com/moof2k/kerasify) it allows for convering keras `.h5` directly to `.h` headerfile and then restoring the model and performing classification using this headerfile, without a need to use `file streams`. The tool was created with purpose to be used on the `Arduino` (or similar) devices, where reading from a file is impossible (at least on versions which do not support file access).
 
 ## Design features
- - Supports 2-layer model (1-layer LSTM + 1-layer Dense)
+ - **Not unit tested**
+ - Supports arbitrary number of LSTM cells followed by one Dense layer.
  - CPU only, no GPU
  - No external dependencies apart from STL for C++ code
  - Compatible with C++11

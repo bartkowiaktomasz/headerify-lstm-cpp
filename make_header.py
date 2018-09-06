@@ -24,6 +24,9 @@ ACTIVATION_SIGMOID = 4
 ACTIVATION_TANH = 5
 ACTIVATION_HARD_SIGMOID = 6
 
+"""
+Given activation return a number assigned to that activation.
+"""
 def activation_type(activation):
     if activation == 'linear':
         return ACTIVATION_LINEAR
@@ -38,30 +41,107 @@ def activation_type(activation):
     elif activation == 'hard_sigmoid':
         return ACTIVATION_HARD_SIGMOID
 
-def append_number_vector(file, name, vector):
-    file.write("std::vector<float> " + name + " = {\n")
-    file.write(', '.join(map(str, vector.tolist())))
+"""
+Append functions are used to append strings to the "file",
+so that it has a C/C++ headerfile style.
+"""
+def append_vector(file, type, name, vector_object):
+    file.write("std::vector<{}> {} = {{\n".format(type, name))
+    file.write(', '.join(map(str, vector_object.tolist())))
     file.write("};\n\n")
+
+def append_list(file, type, name, list):
+    file.write("std::vector<{}> {} = {{".format(type, name))
+    file.write(', '.join(map(str, list)))
+    file.write("};\n")
+
+def append_vector_of_vectors(file, n, type, name, array):
+    file.write("std::vector< std::vector<{}> > {} = {{\n".format(type, name))
+    for i in range(n):
+        append_numbers(file, array[i].flatten())
+        if(i != n - 1):
+            file.write(",\n")
+    file.write("\n};\n")
+
+def append_numbers(file, array):
+    file.write("{")
+    file.write(', '.join(map(str, array.tolist())))
+    file.write("}")
 
 def append_includes(file):
     file.write("#include <string>\n")
     file.write("#include <vector>\n")
     file.write("\n")
 
+"""
+Function used for creating and saving to disk a headerfile.
+Input: Keras model (.h5)
+Output: None (saves file to disk)
+"""
 def make_header(model):
     model_layers = [l for l in model.layers if type(l).__name__ not in ['Dropout']]
     num_layers = len(model_layers)
+
+    # Count number of each layer type
+    lstm_layers_count = 0
+    dense_layers_count = 0
+
     with open(HEADERFILE_NAME, "a") as file:
         append_includes(file)
         file.write("unsigned int NUM_LAYERS = " + str(num_layers) + ";\n")
-        if(num_layers != 2):
-            print("Models with two layers are allowed only")
-            raise ValueError
+
+        if len([type(layer).__name__ for layer in model_layers if type(layer).__name__ == 'Dense']) > 1:
+            print("Error: Only one dense layer allowed")
+            exit()
+
+        if 'LSTM' in [type(layer).__name__ for layer in model_layers]:
+            recurrent_activation_list = []
+            activation_list = []
+            return_sequences_list = []
+
+            num_units_list = []
+
+            W_i_list = []
+            W_f_list = []
+            W_c_list = []
+            W_o_list = []
+
+            U_i_list = []
+            U_f_list = []
+            U_c_list = []
+            U_o_list = []
+
+            b_i_list = []
+            b_f_list = []
+            b_c_list = []
+            b_o_list = []
+
+            W_i_ROWS_list = []
+            W_i_COLS_list = []
+            W_f_ROWS_list = []
+            W_f_COLS_list = []
+            W_c_ROWS_list = []
+            W_c_COLS_list = []
+            W_o_ROWS_list = []
+            W_o_COLS_list = []
+            U_i_ROWS_list = []
+            U_i_COLS_list = []
+            U_f_ROWS_list = []
+            U_f_COLS_list = []
+            U_c_ROWS_list = []
+            U_c_COLS_list = []
+            U_o_ROWS_list = []
+            U_o_COLS_list = []
+            b_i_SHAPE_list = []
+            b_f_SHAPE_list = []
+            b_c_SHAPE_list = []
+            b_o_SHAPE_list = []
 
         for layer in model_layers:
             layer_type = type(layer).__name__
-
             if layer_type == 'Dense':
+                dense_layers_count += 1
+
                 weights = layer.get_weights()[0]
                 biases = layer.get_weights()[1]
                 activation = layer.get_config()['activation']
@@ -71,24 +151,27 @@ def make_header(model):
                 file.write("unsigned int DENSE_BIASES_SHAPE = " + str(biases.shape[0]) + ";\n")
                 file.write("unsigned int DENSE_ACTIVATION = " + str(activation_type(activation)) + ";\n\n")
 
-                append_number_vector(file, "DENSE_WEIGHTS", weights.flatten())
-                append_number_vector(file, "DENSE_BIASES", biases)
-
+                append_vector(file, "float", "DENSE_WEIGHTS", weights.flatten())
+                append_vector(file, "float", "DENSE_BIASES", biases)
 
             elif layer_type == 'LSTM':
+                lstm_layers_count += 1
+
                 recurrent_activation = layer.get_config()['recurrent_activation']
                 activation = layer.get_config()['activation']
                 return_sequences = int(layer.get_config()['return_sequences'])
 
-                file.write("unsigned int LSTM_RECURRENT_ACTIVATION = " + str(activation_type(recurrent_activation)) + ";\n")
-                file.write("unsigned int LSTM_ACTIVATION =  " + str(activation_type(activation)) + ";\n")
-                file.write("unsigned int RETURN_SEQUENCES = " + str(return_sequences) + ";\n")
+                recurrent_activation_list += str(activation_type(recurrent_activation))
+                activation_list += str(activation_type(activation))
+                return_sequences_list += str(return_sequences)
 
-                W = model.layers[0].get_weights()[0]
-                U = model.layers[0].get_weights()[1]
-                b = model.layers[0].get_weights()[2]
-                num_units = int(int(model.layers[0].trainable_weights[0].shape[1])/4)
-                file.write("unsigned int N_HIDDEN_NEURONS = " + str(num_units) + ";\n\n")
+                W = layer.get_weights()[0]
+                U = layer.get_weights()[1]
+                b = layer.get_weights()[2]
+
+                num_units = int(int(layer.trainable_weights[0].shape[1])/4)
+                num_units_list.append(num_units)
+                # file.write("unsigned int N_HIDDEN_NEURONS = " + str(num_units) + ";\n\n")
 
                 W_i = W[:, :num_units]
                 W_f = W[:, num_units: num_units * 2]
@@ -105,41 +188,80 @@ def make_header(model):
                 b_c = b[num_units * 2: num_units * 3]
                 b_o = b[num_units * 3:]
 
-                file.write("unsigned int W_i_ROWS = " + str(W_i.shape[0]) + ";\n")
-                file.write("unsigned int W_i_COLS = " + str(W_i.shape[1]) + ";\n")
-                file.write("unsigned int W_f_ROWS = " + str(W_f.shape[0]) + ";\n")
-                file.write("unsigned int W_f_COLS = " + str(W_f.shape[1]) + ";\n")
-                file.write("unsigned int W_c_ROWS = " + str(W_c.shape[0]) + ";\n")
-                file.write("unsigned int W_c_COLS = " + str(W_c.shape[1]) + ";\n")
-                file.write("unsigned int W_o_ROWS = " + str(W_o.shape[0]) + ";\n")
-                file.write("unsigned int W_o_COLS = " + str(W_o.shape[1]) + ";\n")
-                file.write("unsigned int U_i_ROWS = " + str(U_i.shape[0]) + ";\n")
-                file.write("unsigned int U_i_COLS = " + str(U_i.shape[1]) + ";\n")
-                file.write("unsigned int U_f_ROWS = " + str(U_f.shape[0]) + ";\n")
-                file.write("unsigned int U_f_COLS = " + str(U_f.shape[1]) + ";\n")
-                file.write("unsigned int U_c_ROWS = " + str(U_c.shape[0]) + ";\n")
-                file.write("unsigned int U_c_COLS = " + str(U_c.shape[1]) + ";\n")
-                file.write("unsigned int U_o_ROWS = " + str(U_o.shape[0]) + ";\n")
-                file.write("unsigned int U_o_COLS = " + str(U_o.shape[1]) + ";\n")
-                file.write("unsigned int b_i_SHAPE = " + str(b_i.shape[0]) + ";\n")
-                file.write("unsigned int b_f_SHAPE = " + str(b_f.shape[0]) + ";\n")
-                file.write("unsigned int b_c_SHAPE = " + str(b_c.shape[0]) + ";\n")
-                file.write("unsigned int b_o_SHAPE = " + str(b_o.shape[0]) + ";\n")
-                file.write("\n")
+                W_i_list.append(W_i)
+                W_f_list.append(W_f)
+                W_c_list.append(W_c)
+                W_o_list.append(W_o)
 
-                append_number_vector(file, "W_i", W_i.flatten())
-                append_number_vector(file, "W_f", W_f.flatten())
-                append_number_vector(file, "W_c", W_c.flatten())
-                append_number_vector(file, "W_o", W_o.flatten())
-                append_number_vector(file, "U_i", U_i.flatten())
-                append_number_vector(file, "U_f", U_f.flatten())
-                append_number_vector(file, "U_c", U_c.flatten())
-                append_number_vector(file, "U_o", U_o.flatten())
+                U_i_list.append(U_i)
+                U_f_list.append(U_f)
+                U_c_list.append(U_c)
+                U_o_list.append(U_o)
 
-                append_number_vector(file, "b_i", b_i)
-                append_number_vector(file, "b_f", b_f)
-                append_number_vector(file, "b_c", b_c)
-                append_number_vector(file, "b_o", b_o)
+                b_i_list.append(b_i)
+                b_f_list.append(b_f)
+                b_c_list.append(b_c)
+                b_o_list.append(b_o)
+
+                W_i_ROWS_list.append(str(W_i.shape[0]))
+                W_i_COLS_list.append(str(W_i.shape[1]))
+                W_f_ROWS_list.append(str(W_f.shape[0]))
+                W_f_COLS_list.append(str(W_f.shape[1]))
+                W_c_ROWS_list.append(str(W_c.shape[0]))
+                W_c_COLS_list.append(str(W_c.shape[1]))
+                W_o_ROWS_list.append(str(W_o.shape[0]))
+                W_o_COLS_list.append(str(W_o.shape[1]))
+                U_i_ROWS_list.append(str(U_i.shape[0]))
+                U_i_COLS_list.append(str(U_i.shape[1]))
+                U_f_ROWS_list.append(str(U_f.shape[0]))
+                U_f_COLS_list.append(str(U_f.shape[1]))
+                U_c_ROWS_list.append(str(U_c.shape[0]))
+                U_c_COLS_list.append(str(U_c.shape[1]))
+                U_o_ROWS_list.append(str(U_o.shape[0]))
+                U_o_COLS_list.append(str(U_o.shape[1]))
+                b_i_SHAPE_list.append(str(b_i.shape[0]))
+                b_f_SHAPE_list.append(str(b_f.shape[0]))
+                b_c_SHAPE_list.append(str(b_c.shape[0]))
+                b_o_SHAPE_list.append(str(b_o.shape[0]))
+
+        append_list(file, "unsigned int", 'LSTM_RECURRENT_ACTIVATION', recurrent_activation_list)
+        append_list(file, "unsigned int", 'LSTM_ACTIVATION', activation_list)
+        append_list(file, "unsigned int", 'RETURN_SEQUENCES', return_sequences_list)
+        append_list(file, "unsigned int", 'N_HIDDEN_NEURONS', num_units_list)
+        append_list(file, "unsigned int", 'W_i_ROWS', W_i_ROWS_list)
+        append_list(file, "unsigned int", 'W_i_COLS', W_i_COLS_list)
+        append_list(file, "unsigned int", 'W_f_ROWS', W_f_ROWS_list)
+        append_list(file, "unsigned int", 'W_f_COLS', W_f_COLS_list)
+        append_list(file, "unsigned int", 'W_c_ROWS', W_c_ROWS_list)
+        append_list(file, "unsigned int", 'W_c_COLS', W_c_COLS_list)
+        append_list(file, "unsigned int", 'W_o_ROWS', W_o_ROWS_list)
+        append_list(file, "unsigned int", 'W_o_COLS', W_o_COLS_list)
+        append_list(file, "unsigned int", 'U_i_ROWS', U_i_ROWS_list)
+        append_list(file, "unsigned int", 'U_i_COLS', U_i_COLS_list)
+        append_list(file, "unsigned int", 'U_f_ROWS', U_f_ROWS_list)
+        append_list(file, "unsigned int", 'U_f_COLS', U_f_COLS_list)
+        append_list(file, "unsigned int", 'U_c_ROWS', U_c_ROWS_list)
+        append_list(file, "unsigned int", 'U_c_COLS', U_c_COLS_list)
+        append_list(file, "unsigned int", 'U_o_ROWS', U_o_ROWS_list)
+        append_list(file, "unsigned int", 'U_o_COLS', U_o_COLS_list)
+        append_list(file, "unsigned int", 'b_i_SHAPE', b_i_SHAPE_list)
+        append_list(file, "unsigned int", 'b_f_SHAPE', b_f_SHAPE_list)
+        append_list(file, "unsigned int", 'b_c_SHAPE', b_c_SHAPE_list)
+        append_list(file, "unsigned int", 'b_o_SHAPE', b_o_SHAPE_list)
+
+        append_vector_of_vectors(file, lstm_layers_count ,'float', 'W_i', W_i_list)
+        append_vector_of_vectors(file, lstm_layers_count ,'float', 'W_f', W_f_list)
+        append_vector_of_vectors(file, lstm_layers_count ,'float', 'W_c', W_c_list)
+        append_vector_of_vectors(file, lstm_layers_count ,'float', 'W_o', W_o_list)
+        append_vector_of_vectors(file, lstm_layers_count ,'float', 'U_i', U_i_list)
+        append_vector_of_vectors(file, lstm_layers_count ,'float', 'U_f', U_f_list)
+        append_vector_of_vectors(file, lstm_layers_count ,'float', 'U_c', U_c_list)
+        append_vector_of_vectors(file, lstm_layers_count ,'float', 'U_o', U_o_list)
+        append_vector_of_vectors(file, lstm_layers_count ,'float', 'b_i', b_i_list)
+        append_vector_of_vectors(file, lstm_layers_count ,'float', 'b_f', b_f_list)
+        append_vector_of_vectors(file, lstm_layers_count ,'float', 'b_c', b_c_list)
+        append_vector_of_vectors(file, lstm_layers_count ,'float', 'b_o', b_o_list)
+
     file.close()
 
 if __name__ == '__main__':

@@ -11,6 +11,7 @@ import pandas as pd
 
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, LSTM
+from keras.optimizers import Adam
 from sklearn.model_selection import train_test_split
 
 from preprocessing import get_convoluted_data
@@ -26,9 +27,12 @@ def createLSTM(X_train,
     Hyperparameters of the model are taken from the config file.
     """
 
-    # Build a model
+    # Build an LSTM model
+    # For more LSTM cells, add an argument
+    # "return_sequences=True" in the first LSTM cell
     model = Sequential()
-    model.add(LSTM(N_HIDDEN_NEURONS, input_shape=(SEGMENT_TIME_SIZE, N_FEATURES)))
+    model.add(LSTM(N_HIDDEN_NEURONS,
+              input_shape=(SEGMENT_TIME_SIZE, N_FEATURES)))
     model.add(Dropout(DROPOUT_RATE))
     model.add(Dense(N_CLASSES, activation='sigmoid'))
     adam_optimizer = Adam(lr=LEARNING_RATE, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
